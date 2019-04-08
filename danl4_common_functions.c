@@ -1,636 +1,104 @@
-#include "eeconfig.h"
-#include "action_layer.h"
-//#include "keymap_colemak.h"
-extern keymap_config_t keymap_config;
+#include QMK_KEYBOARD_H
+#define PREONIC_YES                 // This is the Preonic
+#include "danl4_common_functions.c"
 
-// Fillers to make layering more clear
-#define _______ KC_TRNS
-#define XXXXXXX KC_NO
-//#define C(n)    RCTL(n)
-//#define CADKEY  RCTL(RALT(KC_DEL))
+const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
+[_WINBASE] = LAYOUT_preonic_1x2uC(  /* Base Layer */
+ /*
+  KC_ESC,   KC_EXLM, KC_AT,   KC_HASH, KC_DLR,  KC_PERC, KC_CIRC, KC_AMPR, KC_ASTR, KC_LPRN, KC_RPRN, KC_BSPC, \
+  KC_TAB,   KC_Q,    KC_W,    KC_F,    KC_P,    KC_G,    KC_J,    KC_L,    KC_U,    KC_Y,    KC_QUOT, KC_ENT,  \
+  KC_BSPC,  KC_A,    KC_R,    KC_S,    KC_T,    KC_D,    KC_H,    KC_N,    KC_E,    KC_I,    KC_O,    KC_ENT,  \
+  SHFT_CAP, KC_Z,    KC_X,    KC_C,    LC_V,    KC_B,    KC_K,    KC_M,    KC_COMM, KC_DOT,  KC_SLSH, KC_RSFT, \
+  CTRLB,    TD(SUP), KC_LALT, KC_LCTL, TD(LOW), KC_SPC,      TD(RAI), KC_LEFT, KC_DOWN, KC_UP,   KC_RGHT  \
+),*/
+  KC_TAB,  KC_Q,   KC_W,    KC_E,   KC_R,    KC_T,	KC_Y,	KC_U,    KC_I,     KC_O,     KC_P,	KC_BSLASH,\
+  MIRR_ESC,SHFT_A, CTRL_S,  ALT_D,  GUI_F,   KC_G,	KC_H,	GUI_J,   ALT_K,    CTRL_L,   SHSQ,	TD(QUO),\
+  TD(CLS), Z_UNDO, X_REDO,  KC_C,   KC_V,    KC_B,	KC_N,	KC_M,    CTRL_COMM,SHFT_DOT, SLASHES,   KC_RSHIFT,\
+  KC_TAB,  KC_LGUI,MIRR_DEL,NUMPAD, KC_BSPC, CTRL_TAB,	SFT_ENT,KC_SPC,  ARROWS,   FN_ESC,   KC_EQUAL,	CPYPST,\
+ _______, _______, _______, _______, _______,_______,	_______,_______, _______,  _______,  _______ \
+), 
 
-// Macro name shortcuts
-#define WBASE TO(_WINBASE)
-#define MIRROR MO(_MIRROR)
-//#define WARROWS TD(WARR)
-//#define WNUMPAD TD(WNUM)
-#define FUNCTN MO(_FUNC)
-#define XBASE TO(_OSXBASE)
-#define XMIRROR MO(_XMIRROR)
-//#define XARROWS TD(XARR)
-//#define XNUMPAD TD(XNUM)
-#define XFUNCTN MO(_XFUNC)
-#define NUMPAD MO(_NUMPAD)
-#define ARROWS MO(_ARROWS)
-//#define NUMTAB LT(_NUMPAD, KC_TAB)//MO(_NUMPAD)//TD(NUMTB)//
-//#define FN_CAPSL LT(_FUNC, KC_CAPSLOCK)
-//#define MIRR_ESC LT(_MIRROR, KC_ESC)
-#define FN_ESC LT(_FUNC, KC_ESC)
-#define MIRR_TAB LT(_MIRROR, KC_TAB)
+/*BATREUS: 
+KC_TAB,  KC_ESC,
+                   NUMPAD, KC_BSPC,CTLDEL,//regular thumbs left
+                                           KC_LGUI,  MO(_MIRROR),//middle thumbs for BATreus
+                                                              KC_ENT,KC_SPC,  ARROWS, //regular thumbs right
+                                                                                                KC_MINUS,       KC_EQUAL,
+Atreus:
+KC_TAB,  KC_ESC,KC_LGUI,NUMPAD, KC_BSPC, CTLDEL,         SFT_ENT, KC_SPC,  ARROWS,   KC_MINUS, KC_EQUAL, CPYPST, 
+*/
+
+[_MIRROR] = LAYOUT_preonic_1x2uC(  /*MIRROR*/
+  KC_BSLASH,  KC_P,           KC_O,    KC_I,     KC_U,    KC_Y,           KC_MS_ACCEL0, KC_MS_BTN1,	KC_MS_UP,  KC_MS_BTN2, KC_Q,KC_BSLASH, \
+  _______, TD(SCL),        KC_L,    KC_K,     KC_J,    KC_H,           KC_MS_ACCEL1, KC_MS_LEFT,	KC_MS_DOWN,KC_MS_RIGHT,KC_A,TD(QUO), \
+  TD(CLS), CTL_T(KC_SLASH),KC_DOT,  KC_COMM,  KC_M,    KC_N,           KC_MS_ACCEL2, KC_V,		KC_MS_DOWN,KC_X,       KC_Z,KC_RSHIFT, \
+  KC_EQUAL,KC_MINUS,	_______, _______,  KC_SPC,  KC_ENT,	    LGUI(KC_DEL), KC_BSPC,	KC_TAB, TO(_WINBASE),_______, _______, \
+  _______, _______,         _______, _______, _______,          _______, _______, _______,       _______, _______, _______ \
+  ),
+/*BATREUS:
+KC_EQUAL, KC_MINUS,       _______,   KC_SPC,   RSFT_T(KC_ENT),   KC_LCTL, KC_LGUI, KC_DEL, KC_BSPC, _______, KC_LGUI,KC_LALT, \
+
+// ATREUS:
+CPYPST, KC_EQUAL, KC_MINUS,       _______,   KC_SPC, RSFT_T(KC_ENT),LGUI(KC_DEL),KC_BSPC,_______,KC_LGUI,KC_LALT,NUMPAD, \
+  */
 
 
-#define Z_UNDO    TD(ZUNDO)//W=Windows
-#define X_REDO    TD(XREDO)
-#define C_COPYCUT TD(CCPC)
-#define V_PASTE   TD(VCPC)
-#define Z_UNDO_X    TD(ZUNDO_X) //X = OSX
-#define X_REDO_X    TD(XREDO_X)
-#define C_COPYCUT_X TD(CCPC_X)
-#define V_PASTE_X   	TD(VCPC_X)
-//#define C_COPYCUT_X	TD(CCPC_X)
-//#define V_PASTE_X 	TD(VPASTE_X)
 
-
-#define CTLDEL CTL_T(KC_DEL)
-#define SFT_ENT RSFT_T(KC_ENT)
-
-#define CTRL_S LCTL_T(KC_S)
-#define CTRL_L LCTL_T(KC_L)
-#define ALT_D LALT_T(KC_D)
-#define ALT_K LALT_T(KC_K)
-#define GUI_F LGUI_T(KC_F)
-#define GUI_J LGUI_T(KC_J)
-#define SHFT_SCL RSFT_T(KC_SCLN)
-#define CTRL_COMM LCTL_T(KC_COMM)
-#define SHFT_A LSFT_T(KC_A)
-#define SHFT_DOT RSFT_T(KC_DOT)
-
-#define LANGSWP LALT(KC_LSFT)
-#define LANGSWPX LGUI(KC_SPC)
-
-#define ALT_TAB LALT(KC_TAB)
-#define CTRL_TAB LCTL(KC_TAB)
-
-#define PARAN TD(PAR)
-#define CURLY TD(CRL)
-#define SQUAR TD(SQU)
-
-#define SLASHES TD(SLSH)//SLASH on tap, backslash on doubletap
-#define SHSQ TD(SSQ)//shift on hold, semicolon on tap, quotation mark on doubletap
-
-void K_tap(uint16_t keycode){
-    register_code(keycode);
-    unregister_code(keycode);
-};
-
-void persistent_default_layer_set(uint16_t default_layer){
-    eeconfig_update_default_layer(default_layer);
-    default_layer_set(default_layer);
-};
-
-// Automatic number generation of important keywords
-enum my_keycodes{
-    // Layer numbers
-	_WINBASE= 0,
-	_OSXBASE,
-	_NUMPAD,
-	_ARROWS,
-	_FUNC,
-	_XARROWS,
-	_MIRROR,
-	_XMIRROR,
-	
-	_XFUNC,
-	_XNUMPAD,
-	// These use process_record_user()
-	WINBASE = SAFE_RANGE,
-	//ARROWS,
-	//NUMPAD,
-	XARROWS,
-	XNUMPAD,
-	//XFUNC,
-	OSXBASE,
-	SHFT_CAP,
-	CTRLB,
-	CPYPST,
-	CPYPST_X,
-	// Tap_Dance nums
-	WARR = 0,
-	NUMTB,//    WNUM,
-	XARR,
-	XNUM,
-	SUP,
-	CLS,
-	SCL,
-	QUO,
-	// Tap dance paranthesis
-	PAR,CRL,SQU,
-	SSQ, //SHIFT ON HOLD SEMICOLON, QUOTATION MARK ON DOUBLE
-	SLSH, //SLASH ON TAP, BACKSLASH ON DOUBLETAP
-	// Copy paste
-	CPC,
-	CPC_X,
-	//CUT COPY PASTE   ,CCPC,VCPC,VPASTE
-	//VCPC_W,
-	//VCPC_X,
-	ZUNDO,
-	XREDO,
-	ZUNDO_X,
-	XREDO_X,
-};
-
-#ifdef AUDIO_ENABLE
-#include "audio.h"
-float tone_startup[][2]         = SONG(STARTUP_SOUND);
-float tone_goodbye[][2]         = SONG(GOODBYE_SOUND);
-float tone_colemak[][2]         = SONG(COLEMAK_SOUND);
-float tone_swcole[][2]          = SONG(QWERTY_SOUND);
-float tone_capslock_on[][2]     = SONG(CAPS_LOCK_ON_SOUND);
-float tone_capslock_off[][2]    = SONG(CAPS_LOCK_OFF_SOUND);
-float tone_ctrl_mod[][2]        = SONG(COIN_SOUND);
-float tone_copy[][2]            = SONG(SCROLL_LOCK_ON_SOUND);
-float tone_paste[][2]           = SONG(SCROLL_LOCK_OFF_SOUND);
-float uniwin[][2]               = SONG(UNICODE_WINDOWS);
-float unilin[][2]               = SONG(UNICODE_LINUX);
-#endif
-#ifdef TAP_DANCE_ENABLE
-#define TAPPING_TERM 200
-uint32_t layer_state_set_user(uint32_t state) {
-return update_tri_layer_state(state,_ARROWS,_NUMPAD,_FUNC);
+[_ARROWS] = LAYOUT_preonic_1x2uC(  /* RAISE - Arrows */
+  ALT_TAB, 	KC_LALT,   	XXXXXXX,	KC_PIPE,   	KC_TILD,	XXXXXXX, XXXXXXX,  KC_HOME, KC_UP,   KC_PGUP,  XXXXXXX,   _______,\
+  _______, 	_______,   	_______, 	_______, 	_______,	XXXXXXX, KC_PSCR,  KC_LEFT, KC_DOWN, KC_RIGHT, XXXXXXX,   _______,\
+  _______, 	LCTL(KC_Z),	LCTL(KC_X),	LCTL(KC_C),	LCTL(KC_V),	XXXXXXX, XXXXXXX,  KC_END,  KC_DOWN, KC_PGDN,  XXXXXXX,   _______,\
+  TO(_WINBASE),	KC_APP,		_______,   	_______,   	CTLDEL,	_______, _______,  _______, _______, _______,  _______, _______, \
+  _______, 	_______,   	_______,   	_______,   	_______,	_______, _______,  _______, _______, _______, _______\
 /*
-uint32_t newState;
-	switch (biton32(state)) {
-    case _FUNC:
-	register_code(KC_F);
-	unregister_code(KC_F);
-	break;
-    case _ARROWS:
-	register_code(KC_A);
-	unregister_code(KC_A);
-	break;
-    case _NUMPAD:
-	register_code(KC_N);
-	unregister_code(KC_N);
-	break;
-    case _MIRROR:
-	register_code(KC_M);
-	unregister_code(KC_M);
-	break;
-}
-  newState = update_tri_layer_state(state,_ARROWS,_NUMPAD,_FUNC);
-	switch (biton32(newState)) {
-    case _MIRROR:
-	register_code(KC_M);
-	unregister_code(KC_M);
-	break;
-    case _FUNC:
-	register_code(KC_F);
-	unregister_code(KC_F);
-	break;
-    case _ARROWS:
-	register_code(KC_A);
-	unregister_code(KC_A);
-	break;
-    case _NUMPAD:
-	register_code(KC_N);
-	unregister_code(KC_N);
-	break;
-}
-  //state = update_tri_layer_state(state, _RAISE, _SYMB, _SPECIAL);
-  return newState;*/
-}
+BATreus
+  _______, _______, FUNCTN, _______, _______, _______, _______,  _______, _______, FUNCTN,  _______, _______, \
+
+Atreus
+  _______, _______, _______, _______, _______, _______, _______,  _______,  FUNCTN,_______,  _______, _______, \
+
+*/
 
 
-void dance_XNUMPAD_press(qk_tap_dance_state_t *state, void *user_data){// Called on each tap
-  switch(state->count){      // Only turn the layer on once
-    case 1:
-        //layer_off(_XFUNC);
-        layer_on(_XNUMPAD);
-        update_tri_layer(_XNUMPAD, _XARROWS, _XFUNC);
-        break;
-  }
-};
-void dance_XNUMPAD_lift(qk_tap_dance_state_t *state, void *user_data){ // Called on release
-  switch(state->count){
-    case 1:         // Normal action. Turn off layers
-        layer_off(_XNUMPAD);
-        update_tri_layer(_XNUMPAD, _XARROWS, _XFUNC);
-        //layer_off(_XFUNC);
-        break;
-  }
-};
+),
 
+[_NUMPAD] = LAYOUT_preonic_1x2uC(  /* LOWER - Numpad */
+/*  KC_TILD, KC_EXLM, KC_AT,   KC_HASH, KC_DLR,  KC_PERC, KC_CIRC, KC_AMPR, KC_ASTR, KC_QUES, KC_DQT,  KC_DEL,  \
+  KC_TILD, KC_EXLM, KC_AT,   KC_HASH, KC_DLR,  KC_PERC, KC_CIRC, KC_AMPR, KC_ASTR, KC_QUES, KC_DQT,  KC_DEL,  \
+  KC_DEL,  KC_LBRC, KC_RBRC, KC_MINS, KC_UNDS, KC_HOME, KC_END,  KC_LPRN, KC_RPRN, KC_SLSH, KC_SCLN, KC_PGUP, \
+  CPYPST,  XXXXXXX, C(KC_X), KC_LABK, KC_RABK, XXXXXXX, XXXXXXX, KC_LCBR, KC_RCBR, KC_BSLS, KC_COLN, KC_PGDN, \
+  _______, _______, _______, _______, _______,      KC_TAB,      _______, _______, _______, _______, _______  \*/
 
-void dance_XARROWS_press(qk_tap_dance_state_t *state, void *user_data){// Called on tap
-  switch(state->count){
-    case 1:         // Turn on lower
-        //layer_off(_XFUNC);
-        layer_on(_XARROWS);
-        update_tri_layer(_XNUMPAD, _XARROWS, _XFUNC);
-        break;
-  }
-};
-void dance_XARROWS_lift(qk_tap_dance_state_t *state, void *user_data){ // Called on release
-  switch(state->count){
-    case 1:         // Normal action. Turn off layers
-        layer_off(_XARROWS);
-        update_tri_layer(_XNUMPAD, _XARROWS, _XFUNC);
-        //layer_off(_XFUNC);
-        break;
-    case 2:         // Turn on _UNICODES layer
-        layer_off(_XARROWS);
-        update_tri_layer(_XNUMPAD, _XARROWS, _XFUNC);
-        //layer_on(_XFUNC);
-        #ifdef AUDIO_ENABLE
-            PLAY_SONG(tone_ctrl_mod);
-        #endif
-        break;
-  }
-};
-
-
-
-//////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////
-// Shift vs capslock function
-void caps_tap (qk_tap_dance_state_t *state, void *user_data) {
-    if (state->count == 1) {
-        register_code (KC_LSFT);
-    } else if (state->count == 2) {
-        unregister_code (KC_LSFT);
-        register_code (KC_CAPS);
-    }
-}
-void caps_tap_end (qk_tap_dance_state_t *state, void *user_data) {
-    if (state->count == 1) {
-        unregister_code (KC_LSFT);
-    } else {
-        unregister_code (KC_CAPS);
-    }
-}
-
-// Parantheses
-void paranthesis_dance (qk_tap_dance_state_t *state, void *user_data) {
-    if (state->count == 1) {
-        SEND_STRING("()"); register_code(KC_LEFT); unregister_code(KC_LEFT);
-        } else if (state->count == 2) {
-            SEND_STRING("(");
-        } else if (state->count == 3) {
-            SEND_STRING(")");
-    }
-}
-void curly_dance (qk_tap_dance_state_t *state, void *user_data) {
-    if (state->count == 1) {
-        SEND_STRING("{}"); register_code(KC_LEFT); unregister_code(KC_LEFT);
-        } else if (state->count == 2) {
-            SEND_STRING("{");
-        } else if (state->count == 3) {
-            SEND_STRING("}");
-    }
-}
-
-void square_dance (qk_tap_dance_state_t *state, void *user_data) {
-    if (state->count == 1) {
-        SEND_STRING("[]"); register_code(KC_LEFT); unregister_code(KC_LEFT);
-        } else if (state->count == 2) {
-            SEND_STRING("[");
-        } else if (state->count == 3) {
-            SEND_STRING("]");
-    }
-}
-
-enum {
-  SINGLE_TAP = 1,
-  SINGLE_HOLD = 2,
-  DOUBLE_TAP = 3,
-  DOUBLE_HOLD = 4,
-  DOUBLE_SINGLE_TAP = 5, //send SINGLE_TAP twice - NOT DOUBLE_TAP
-  // Add more enums here if you want for triple, quadruple, etc.
-  TRIPLE_TAP = 6,
-  TRIPLE_HOLD = 7
-};
-
-enum {
-  SINGLE_TAP_OR_HOLD = 1,
-  DOUBLE_TAP_OR_HOLD = 2,
-};
-typedef struct {
-  bool is_press_action;
-  int state;
-} S_tap;
-
-static S_tap ztap_state = {
-  .is_press_action = true,
-  .state = 0
-};
-
-
-// Copy or cut feature
-void copy_cut_W (qk_tap_dance_state_t *state, void *user_data) {
-    if (state->count == 1) {
-        register_code (KC_LCTL);
-        register_code (KC_C);
-        unregister_code (KC_C);
-        unregister_code (KC_LCTL);
-    } else if (state->count == 2) {
-        register_code (KC_LCTL);
-        register_code (KC_X);
-        unregister_code (KC_X);
-        unregister_code (KC_LCTL);
-    }
-}
-
-// Copy or cut feature
-void copy_cut_X (qk_tap_dance_state_t *state, void *user_data) {
-    if (state->count == 1) {
-        register_code (KC_LGUI);
-        register_code (KC_C);
-        unregister_code (KC_C);
-        unregister_code (KC_LGUI);
-    } else if (state->count == 2) {
-        register_code (KC_LGUI);
-        register_code (KC_X);
-        unregister_code (KC_X);
-        unregister_code (KC_LGUI);
-    }
-}
-
-
-int cur_dance (qk_tap_dance_state_t *state) {
-  if ((state->count == 1) && (!state->pressed)) return SINGLE_TAP;
-  else if ((state->count == 1) && (state->pressed)) return SINGLE_HOLD;
-  else if ((state->count == 2) && (!state->pressed)) return DOUBLE_TAP;
-  else if ((state->count == 2) && (state->pressed)) return DOUBLE_HOLD;
-  else return 5; //magic number. At some point this method will expand to work for more presses
-}
-
-
-
-void z_reset_W (qk_tap_dance_state_t *state, void *user_data) {
-  switch (ztap_state.state) {
-	case SINGLE_TAP: unregister_code(KC_Z); break;
-	case SINGLE_HOLD: unregister_code(KC_LCTRL); break;
-	case DOUBLE_TAP:
-		unregister_code(KC_Z);
-		unregister_code(KC_LCTRL);
-		break;
-	case DOUBLE_HOLD: unregister_code(KC_LALT);break;
-	case DOUBLE_SINGLE_TAP: unregister_code(KC_Z);
-    case TRIPLE_TAP:
-		unregister_code(KC_Y);
-		unregister_code(KC_LCTRL);
-		break;
-  }
-  ztap_state.state = 0;
-}
-
-
-
-
-void z_finished_W (qk_tap_dance_state_t *state, void *user_data) {
-  ztap_state.state = cur_dance(state);
-  switch (ztap_state.state) {
-	case SINGLE_TAP: register_code(KC_Z); break;
-	case SINGLE_HOLD: register_code(KC_LCTRL); break;
-	case DOUBLE_TAP:
-		register_code(KC_LCTRL);
-		register_code(KC_Z);
-		break;
-	case DOUBLE_HOLD: register_code(KC_LALT); break;
-	case DOUBLE_SINGLE_TAP: register_code(KC_Z); unregister_code(KC_Z); register_code(KC_Z); break;
-    case TRIPLE_TAP:
-		register_code(KC_LCTRL);
-		register_code(KC_Y);
-		break;
-
-  }
-}
-
-
-void z_reset_X (qk_tap_dance_state_t *state, void *user_data) {
-  switch (ztap_state.state) {
-	case SINGLE_TAP: unregister_code(KC_Z); break;
-	case SINGLE_HOLD: unregister_code(KC_LGUI); break;
-	case DOUBLE_TAP:
-		unregister_code(KC_Z);
-		unregister_code(KC_LGUI);
-		break;
-	case DOUBLE_HOLD: unregister_code(KC_LALT);break;
-	case DOUBLE_SINGLE_TAP: unregister_code(KC_Z);
-    case TRIPLE_TAP:
-		unregister_code(KC_Y);
-		unregister_code(KC_LGUI);
-		break;
-  }
-  ztap_state.state = 0;
-}
-
-
-
-
-void z_finished_X (qk_tap_dance_state_t *state, void *user_data) {
-  ztap_state.state = cur_dance(state);
-  switch (ztap_state.state) {
-	case SINGLE_TAP: register_code(KC_Z); break;
-	case SINGLE_HOLD: register_code(KC_LGUI); break;
-	case DOUBLE_TAP:
-		register_code(KC_LGUI);
-		register_code(KC_Z);
-		break;
-	case DOUBLE_HOLD: register_code(KC_LALT); break;
-	case DOUBLE_SINGLE_TAP: register_code(KC_Z); unregister_code(KC_Z); register_code(KC_Z); break;
-    case TRIPLE_TAP:
-		register_code(KC_LGUI);
-		register_code(KC_Y);
-		break;
-
-  }
-}
-
-
-//Shift on hold, ; on tap, ' on double tap
-void SSQ_reset (qk_tap_dance_state_t *state, void *user_data) {
-  switch (ztap_state.state) {
-	case SINGLE_TAP:  unregister_code(KC_SCLN);   break;
-	case SINGLE_HOLD: unregister_code(KC_RSHIFT); break;
-	case DOUBLE_TAP:  unregister_code(KC_QUOT);   break;
-  }
-  ztap_state.state = 0;
-}
-
-
-void SSQ_finished (qk_tap_dance_state_t *state, void *user_data) {
-  ztap_state.state = cur_dance(state);
-  switch (ztap_state.state) {
-	case SINGLE_TAP:  register_code(KC_SCLN);   break;
-	case SINGLE_HOLD: register_code(KC_RSHIFT); break;
-	case DOUBLE_TAP:  register_code(KC_QUOT);   break;
-  }
-}
-
-qk_tap_dance_action_t tap_dance_actions[] = {
-    //[WARR] = ACTION_TAP_DANCE_FN_ADVANCED(dance_ARROWS_press, NULL, dance_ARROWS_lift),
-    //[WNUM] = ACTION_TAP_DANCE_FN_ADVANCED(dance_NUMPAD_press, NULL, dance_NUMPAD_lift),//delete 
-    [XARR] = ACTION_TAP_DANCE_FN_ADVANCED(dance_XARROWS_press, NULL, dance_XARROWS_lift),
-    [XNUM] = ACTION_TAP_DANCE_FN_ADVANCED(dance_XNUMPAD_press, NULL, dance_XNUMPAD_lift),
-    //[SUP] = ACTION_TAP_DANCE_FN_ADVANCED(dance_super_press, dance_super_done, dance_super_lift),
-    [CLS] = ACTION_TAP_DANCE_FN_ADVANCED( caps_tap, NULL, caps_tap_end ),
-    // Shifting for double quote and semicolon
-    [SCL] = ACTION_TAP_DANCE_DOUBLE( KC_SCLN, KC_COLN ),
-    [QUO] = ACTION_TAP_DANCE_DOUBLE( KC_QUOT, KC_DQUO),
-    [SLSH] = ACTION_TAP_DANCE_DOUBLE( KC_SLASH, KC_BSLASH),
-    [SSQ] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, SSQ_finished, SSQ_reset),
-    // Tap dances for paranthesis, which sends macros
-    [PAR] = ACTION_TAP_DANCE_FN_ADVANCED( NULL, NULL, paranthesis_dance ),
-    [CRL] = ACTION_TAP_DANCE_FN_ADVANCED( NULL, NULL, curly_dance ),
-    [SQU] = ACTION_TAP_DANCE_FN_ADVANCED( NULL, NULL, square_dance ),//    WNUM,
-    //[NUMTB] = ACTION_TAP_DANCE_FN_ADVANCED( NULL,  NUMTB_finished, NMTB_reset ),
-    // Tap dance for copy/cutting
+  ALT_TAB, KC_VOLU, KC_AT,  KC_HASH, KC_DLR,  KC_PERC,		KC_ASTR,KC_7,   KC_8,	KC_9,   KC_0,    _______,\
+  LANGSWP, KC_VOLD, CURLY,   SQUAR,   PARAN,    XXXXXXX,	KC_SLSH,KC_4,   KC_5,	KC_6,   KC_PLUS, KC_ASTR,\
+  _______, KC_MUTE, KC_CUT,  KC_COPY, KC_PASTE, KC_PSCR,	KC_0,	KC_1,   KC_2,	KC_3,	KC_MINS, KC_PLUS,\
+  _______, KC_APP,  TO(_WINBASE), _______, CTLDEL,_______,	_______,_______,_______,KC_KP_DOT, _______, _______, \
+  _______, _______, _______, _______, _______,  _______, 	_______,_______,_______,_______, _______\
 
 /*
-    [CPC] = ACTION_TAP_DANCE_FN( copy_cut ),
-    // Currency tap dance    ,[CUR] = ACTION_TAP_DANCE_FN( currency_symbols )
+BATreus
+  _______, _______, FUNCTN, _______, _______, _______, _______,  _______, _______, FUNCTN,  _______, _______, \
+
+Atreus
+  _______, _______, _______, FUNCTN, _______, _______, _______,  _______ ,_______,_______,  _______, _______, \
+
+*/
+),
+
+[_FUNC] = LAYOUT_preonic_1x2uC(  /* ADJUST - Macros, Layer Switching, Function Keys */
+/*  UNIWIN,  XXXXXXX, XXXXXXX, RANDIG,  RANDIG,  KC_INS,  XXXXXXX, XXXXXXX,  XXXXXXX, XXXXXXX, AU_TOG, MU_TOG,  \
+  UNILIN,  SUPA2,   XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, KC_F1,    KC_F2,   KC_F3,   KC_F4,  XXXXXXX, \
+  XXXXXXX, DEGREE,  IBANG,   LAROW,   RAROW,   SWCOLE,  COLEMAK, KC_F5,    KC_F6,   KC_F7,   KC_F8,  BL_INC,  \
+  _______, CADKEY,  MICRO,   WOMEGA,  OMEGA,   XXXXXXX, XXXXXXX, KC_F9,    KC_F10,  KC_F11,  KC_F12, BL_DEC,  \
+  _______, _______, _______, _______, _______,      RESET,       _______,  XXXXXXX, MUV_DE,  MUV_IN, BL_TOGG  \*/
+
+  _______,	KC_VOLU,   RESET,  	XXXXXXX, XXXXXXX, KC_APP,	XXXXXXX,KC_F7,  KC_F8,   KC_F9, KC_F10,  KC_F11,  \
+  TO(_WINBASE), KC_LSHIFT, KC_LCTRL, 	KC_LALT, KC_LGUI, LCTL(KC_LALT),XXXXXXX,KC_F4,  KC_F5,   KC_F6, KC_F11,  XXXXXXX, \
+  XXXXXXX, 	KC_CAPS,   KC_INSERT,	XXXXXXX, KC_F,    KC_PSCR,	XXXXXXX,KC_F1,  KC_F2,   KC_F3, KC_F12,  KC_F12,  \
+  RESET, 	_______,   _______,	_______, _______, _______,	_______,_______,_______, _______,_______, _______,  \
+  _______, 	_______,   _______,	_______, _______, RESET,	_______,XXXXXXX,MUV_DE,  MUV_IN, BL_TOGG  \
+
+)
 
 
-
-    //[VCPC_W]  = ACTION_TAP_DANCE_FN_ADVANCED( NULL, v_finished_W, v_reset_W ),
-    //[CCPC_W]  = ACTION_TAP_DANCE_FN_ADVANCED( NULL, c_finished_W, c_reset_W ),
-    //[VPASTE_W]= ACTION_TAP_DANCE_DOUBLE( KC_V, LCTL(KC_V))*/
-    [ZUNDO] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, z_finished_W, z_reset_W),
-    [XREDO] = ACTION_TAP_DANCE_DOUBLE( KC_X, LCTL(KC_Y)),
-
-    //[VCPC_X]  = ACTION_TAP_DANCE_FN_ADVANCED( NULL, v_finished_X, v_reset_X ),
-    //[CCPC_X]  = ACTION_TAP_DANCE_FN_ADVANCED( NULL, c_finished_X, c_reset_X ),
-    //[VPASTE_X]= ACTION_TAP_DANCE_DOUBLE( KC_V, LGUI(KC_V))*/
-    [ZUNDO_X] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, z_finished_X, z_reset_X),
-    [XREDO_X] = ACTION_TAP_DANCE_DOUBLE( KC_X, LGUI(KC_Y)),
 };
-#endif
-
-
-
-static uint16_t key_timer;
-static uint8_t  caps_status = 0;
-bool process_record_user(uint16_t keycode, keyrecord_t *record) {
-  switch (keycode) {
-    case WINBASE:
-        if(record->event.pressed){
-            persistent_default_layer_set(1UL<<_WINBASE);
-            #ifdef AUDIO_ENABLE
-              PLAY_SONG(tone_colemak);
-            #endif
-        }
-        return false;
-        break;
-  
-    case XARROWS:
-        if(record->event.pressed){
-            layer_on(_XARROWS);
-            update_tri_layer(_XNUMPAD, _XARROWS, _XFUNC);
-        } else {
-            layer_off(_XARROWS);
-            update_tri_layer(_XNUMPAD, _XARROWS, _XFUNC);
-        }
-        return false;
-        break;
-    case XNUMPAD:
-        if(record->event.pressed){
-            layer_on(_XNUMPAD);
-            update_tri_layer(_XNUMPAD, _XARROWS, _XFUNC);
-        } else {
-            layer_off(_XNUMPAD);
-            update_tri_layer(_XNUMPAD, _XARROWS, _XFUNC);
-        }
-        return false;
-        break;
-    case SHFT_CAP:
-        if(record->event.pressed){
-            key_timer = timer_read();               // if the key is being pressed, we start the timer.
-            register_code(KC_LSHIFT);
-        } else {                                    // this means the key was just released (tap or "held down")
-            if(timer_elapsed(key_timer) < 152){     // Time in ms, the threshold we pick for counting something as a tap.
-                K_tap(KC_CAPS);
-                if(caps_status == 0){
-                    caps_status = 1;
-                    #ifdef AUDIO_ENABLE
-                        PLAY_SONG(tone_capslock_on);
-                    #endif
-                } else {
-                    caps_status = 0;
-                    #ifdef AUDIO_ENABLE
-                        PLAY_SONG(tone_capslock_off);
-                    #endif
-                }
-            }
-            unregister_code(KC_LSHIFT);
-        }
-        return false;
-        break;
-
-    case CPYPST:                                    // One key copy/paste
-        if(record->event.pressed){
-            key_timer = timer_read();
-        } else {
-            if (timer_elapsed(key_timer) > 152) {   // Hold, copy
-                register_code(KC_LCTL);
-                K_tap(KC_C);
-                unregister_code(KC_LCTL);
-                #ifdef AUDIO_ENABLE
-                    PLAY_SONG(tone_copy);
-                #endif
-            } else {                                // Tap, paste
-                register_code(KC_LCTL);
-                K_tap(KC_V);
-                unregister_code(KC_LCTL);
-                #ifdef AUDIO_ENABLE
-                    PLAY_SONG(tone_paste);
-                #endif
-            }
-        }
-        return false;
-        break;
-    case CPYPST_X:                                    // One key copy/paste
-        if(record->event.pressed){
-            key_timer = timer_read();
-        } else {
-            if (timer_elapsed(key_timer) > 152) {   // Hold, copy
-                register_code(KC_LGUI);
-                K_tap(KC_C);
-                unregister_code(KC_LGUI);
-                #ifdef AUDIO_ENABLE
-                    PLAY_SONG(tone_copy);
-                #endif
-            } else {                                // Tap, paste
-                register_code(KC_LGUI);
-                K_tap(KC_V);
-                unregister_code(KC_LGUI);
-                #ifdef AUDIO_ENABLE
-                    PLAY_SONG(tone_paste);
-                #endif
-            }
-        }
-        return false;
-        break;
-
-  }
-  return true;
-};
-
-void matrix_init_user(void){        // Run once at startup
-    #ifdef AUDIO_ENABLE
-        _delay_ms(50); // gets rid of tick
-        PLAY_SONG(tone_startup);
-    #endif
-}
-
-#ifdef AUDIO_ENABLE
-void play_goodbye_tone(void){
-  PLAY_SONG(tone_goodbye);
-  _delay_ms(150);
-}
-
-void shutdown_user(){
-    PLAY_SONG(tone_goodbye);
-    _delay_ms(150);
-    stop_all_notes();
-}
-
-void music_on_user(void){           // Run when the music layer is turned on
-    PLAY_SONG(tone_startup);
-}
-
-void music_off_user(void){          // Run when music is turned off
-	PLAY_SONG(tone_goodbye);
-}
-
-#endif
